@@ -1,3 +1,3 @@
-module michaelknudsen/com/WordListReader
+module github.com/michaelknudsen/WordListReader
 
 go 1.13
