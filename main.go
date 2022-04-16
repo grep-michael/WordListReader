@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"michaelknudsen/com/WordListReader/wordlistreader"
 	"sync"
+
+	"github.com/michaelknudsen/WordListReader/wordlistreader"
 )
 
 var done = make(chan int, 2)
