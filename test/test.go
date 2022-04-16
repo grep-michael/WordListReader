@@ -30,7 +30,7 @@ func main() {
 		cont := true
 		str := ""
 		for cont {
-			str, cont = wlr.Readline()
+			str, cont = wlr.ReadLine()
 			one <- str
 		}
 		fmt.Println("thread1 : return one")
@@ -43,7 +43,7 @@ func main() {
 		cont := true
 		str := ""
 		for cont {
-			str, cont = wlr.Readline()
+			str, cont = wlr.ReadLine()
 			two <- str
 		}
 		fmt.Println("thread2 : return two")

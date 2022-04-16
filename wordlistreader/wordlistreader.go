@@ -14,7 +14,7 @@ type WordListReader struct {
 	scanner  *bufio.Scanner
 }
 
-func (wlr *WordListReader) Readline() (string, bool) {
+func (wlr *WordListReader) ReadLine() (string, bool) {
 	wlr.mu.Lock()
 	defer wlr.mu.Unlock()
 	end := wlr.scanner.Scan()
