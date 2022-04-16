@@ -38,7 +38,6 @@ func (wlr *WordListReader) startIter() {
 			str, cont = wlr.ReadLine()
 			wlr.iterChannel <- str
 		}
-		fmt.Println("Iter channel closing")
 		close(wlr.iterChannel)
 	}()
 }
