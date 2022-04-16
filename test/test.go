@@ -21,7 +21,7 @@ func main() {
 	two := make(chan string)
 
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordlistReader("./rockyou.txt")
+	wlr := wordlistreader.MakeNewWordListReader("./rockyou.txt")
 	defer wlr.Close()
 
 	wg.Add(1)

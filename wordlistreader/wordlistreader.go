@@ -25,7 +25,7 @@ func (wlr *WordListReader) Close() {
 	wlr.file.Close()
 }
 
-func MakeNewWordlistReader(filename string) WordListReader {
+func MakeNewWordListReader(filename string) WordListReader {
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("Error opening file: %s\n", err.Error())
