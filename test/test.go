@@ -7,18 +7,87 @@ import (
 	"github.com/michaelknudsen/WordListReader/wordlistreader"
 )
 
-var done = make(chan int, 2)
+/*
 
-func checkdone() bool {
-	return len(done) >= 1
+	Methods will sometimes fail and i blieve thats because the
+	thread that closes a channel (i.e one or two) closes the channel as
+	the 3rd thread tries to read from it.
+
+*/
+
+func Itertest() {
+	var done = make(chan int, 2)
+	/*
+		Test iter method
+	*/
+	one := make(chan string, 1)
+	two := make(chan string, 1)
+
+	var wg sync.WaitGroup
+	wlr := wordlistreader.MakeNewWordListReader("./rockyou.txt")
+	defer wlr.Close()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for str := range wlr.Iter() {
+			one <- str
+		}
+		fmt.Println("thread1 : return one")
+		close(one)
+		done <- 1
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for str := range wlr.Iter() {
+			two <- str
+		}
+		fmt.Println("thread2 : return two")
+		close(two)
+		done <- 2
+	}()
+	wg.Add(1)
+	go func() {
+
+		var oneS string
+		var twoS string
+		for {
+			oneS = "default"
+			twoS = "default"
+			select {
+			case <-one:
+				oneS = <-one
+			case <-two:
+				twoS = <-two
+			case <-done:
+				if len(done) >= 2 {
+					return
+				}
+
+			}
+			if twoS == oneS {
+				fmt.Println("Same")
+				wg.Done()
+				return
+			} else {
+				fmt.Println(oneS, twoS)
+			}
+		}
+
+	}()
+	wg.Wait()
+
 }
 
-func main() {
+func ReadLineTest() {
+	var done = make(chan int, 2)
+
 	/*
-		testing
+		individual threads access readline
 	*/
-	one := make(chan string)
-	two := make(chan string)
+	one := make(chan string, 1)
+	two := make(chan string, 1)
 
 	var wg sync.WaitGroup
 	wlr := wordlistreader.MakeNewWordListReader("./rockyou.txt")
@@ -78,4 +147,5 @@ func main() {
 
 	}()
 	wg.Wait()
+
 }
