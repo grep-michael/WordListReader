@@ -13,7 +13,6 @@ type WordListReader struct {
 	file        *os.File
 	scanner     *bufio.Scanner
 	iterChannel chan string
-	iterStarted bool
 	itermu      sync.Once
 }
 
@@ -29,7 +28,6 @@ func (wlr *WordListReader) Close() {
 }
 
 func (wlr *WordListReader) startIter() {
-	wlr.iterStarted = true
 	wlr.iterChannel = make(chan string)
 	go func() {
 		cont := true

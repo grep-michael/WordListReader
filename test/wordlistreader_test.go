@@ -1,8 +1,8 @@
 package test
 
 import (
-	"fmt"
 	"sync"
+	"testing"
 
 	"github.com/michaelknudsen/WordListReader/wordlistreader"
 )
@@ -15,65 +15,64 @@ import (
 
 */
 
-func Itertest() {
+func TestIter(t *testing.T) {
+
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordListReader("rockyou.txt")
+	wlr := wordlistreader.MakeNewWordListReader("../rockyou.txt")
 	defer wlr.Close()
+
+	threadOneWords := []string{}
+	threadTwoWords := []string{}
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for word := range wlr.Iter() {
-			fmt.Println("one", word)
+			threadOneWords = append(threadOneWords, word)
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for word := range wlr.Iter() {
-			fmt.Println("two", word)
+			threadTwoWords = append(threadTwoWords, word)
 		}
 	}()
 	wg.Wait()
-
+	for _, v1 := range threadOneWords {
+		for _, v2 := range threadTwoWords {
+			if v1 == v2 {
+				t.Error("Duplicate words in lists")
+			}
+		}
+	}
 }
 
-/*UNSUPPORTED
-func ReadLineTest() {
+func TestIterWithChannels(t *testing.T) {
 	var done = make(chan int, 2)
-
-
-		individual threads access readline
 
 	one := make(chan string, 1)
 	two := make(chan string, 1)
 
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordListReader("./rockyou.txt")
+	wlr := wordlistreader.MakeNewWordListReader("../rockyou.txt")
 	defer wlr.Close()
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cont := true
-		str := ""
-		for cont {
-			str, cont = wlr.ReadLine()
-			one <- str
+		for word := range wlr.Iter() {
+			one <- word
 		}
-		fmt.Println("thread1 : return one")
 		close(one)
 		done <- 1
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		cont := true
-		str := ""
-		for cont {
-			str, cont = wlr.ReadLine()
-			two <- str
+		for word := range wlr.Iter() {
+			two <- word
 		}
-		fmt.Println("thread2 : return two")
 		close(two)
 		done <- 2
 	}()
@@ -82,28 +81,24 @@ func ReadLineTest() {
 		defer wg.Done()
 		var oneS string
 		var twoS string
-		for {
-			oneS = "default"
-			twoS = "default"
+		doneCount := 0
+		for doneCount < 1 {
 			select {
-			case <-one:
-				oneS = <-one
-			case <-two:
-				twoS = <-two
+			case x := <-one:
+				oneS = x
+			case y := <-two:
+				twoS = y
 			case <-done:
-				if len(done) >= 2 {
-					return
-				}
+				doneCount += 1
 			}
-			if twoS == oneS {
-				fmt.Println("Same")
+			if twoS == oneS && oneS != "" && twoS != "" {
+				t.Errorf("Duplicate Words, \"%s\" : \"%s\"", oneS, twoS)
 				return
-			} else {
-				fmt.Println(oneS, twoS)
 			}
+
 		}
 
 	}()
 	wg.Wait()
 
-}*/
+}
