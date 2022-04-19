@@ -14,12 +14,12 @@ type WordListReader struct {
 	scanner     *bufio.Scanner
 	iterChannel chan string
 	iterStarted bool
-	itermu      sync.Mutex
+	itermu      sync.Once
 }
 
-func (wlr *WordListReader) ReadLine() (string, bool) {
-	wlr.readlinemu.Lock()
-	defer wlr.readlinemu.Unlock()
+func (wlr *WordListReader) readLine() (string, bool) {
+	//wlr.readlinemu.Lock()
+	//defer wlr.readlinemu.Unlock()
 	end := wlr.scanner.Scan()
 	return wlr.scanner.Text(), end
 
@@ -35,19 +35,16 @@ func (wlr *WordListReader) startIter() {
 		cont := true
 		str := ""
 		for cont {
-			str, cont = wlr.ReadLine()
+			str, cont = wlr.readLine()
 			wlr.iterChannel <- str
 		}
 		close(wlr.iterChannel)
 	}()
+	return
 }
 
 func (wlr *WordListReader) Iter() chan string {
-	wlr.itermu.Lock()
-	if !wlr.iterStarted {
-		wlr.startIter()
-	}
-	wlr.itermu.Unlock()
+	wlr.itermu.Do(wlr.startIter)
 	return wlr.iterChannel
 
 }

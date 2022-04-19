@@ -16,76 +16,34 @@ import (
 */
 
 func Itertest() {
-	var done = make(chan int, 2)
-	/*
-		Test iter method
-	*/
-	one := make(chan string, 1)
-	two := make(chan string, 1)
-
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordListReader("./rockyou.txt")
+	wlr := wordlistreader.MakeNewWordListReader("rockyou.txt")
 	defer wlr.Close()
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		for str := range wlr.Iter() {
-			one <- str
+		for word := range wlr.Iter() {
+			fmt.Println("one", word)
 		}
-		fmt.Println("thread1 : return one")
-		close(one)
-		done <- 1
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		for str := range wlr.Iter() {
-			two <- str
+		for word := range wlr.Iter() {
+			fmt.Println("two", word)
 		}
-		fmt.Println("thread2 : return two")
-		close(two)
-		done <- 2
-	}()
-	wg.Add(1)
-	go func() {
-
-		var oneS string
-		var twoS string
-		for {
-			oneS = "default"
-			twoS = "default"
-			select {
-			case <-one:
-				oneS = <-one
-			case <-two:
-				twoS = <-two
-			case <-done:
-				if len(done) >= 2 {
-					return
-				}
-
-			}
-			if twoS == oneS {
-				fmt.Println("Same")
-				wg.Done()
-				return
-			} else {
-				fmt.Println(oneS, twoS)
-			}
-		}
-
 	}()
 	wg.Wait()
 
 }
 
+/*UNSUPPORTED
 func ReadLineTest() {
 	var done = make(chan int, 2)
 
-	/*
+
 		individual threads access readline
-	*/
+
 	one := make(chan string, 1)
 	two := make(chan string, 1)
 
@@ -148,4 +106,4 @@ func ReadLineTest() {
 	}()
 	wg.Wait()
 
-}
+}*/
