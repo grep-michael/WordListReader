@@ -1,5 +1,7 @@
 # WordListReader
+Golang library for concurrently reading words from a word list
 
-concurrent library for reading from a wordList <br>
-primary use case is for making pentesting scripts <br>
+Designed to be used in devlopment of pentesting and enumeration tools
 
+### todo 
+ - problem with tests sometimes failing. believed to be problem with tests and not library 

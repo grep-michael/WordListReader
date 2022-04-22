@@ -39,10 +39,9 @@ func (wlr *wordListReader) startIter() {
 	return
 }
 
-func (wlr *wordListReader) Iter() chan string {
+func (wlr *wordListReader) Iter() <-chan string {
 	wlr.itermu.Do(wlr.startIter)
 	return wlr.iterChannel
-
 }
 
 func MakeBufferedWordListReader(filename string, buffSize int) wordListReader {
