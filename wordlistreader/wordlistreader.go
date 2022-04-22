@@ -7,33 +7,26 @@ import (
 	"sync"
 )
 
-type WordListReader struct {
+type wordListReader struct {
 	readlinemu  sync.Mutex
 	filename    string
 	file        *os.File
 	scanner     *bufio.Scanner
 	iterChannel chan string
 	itermu      sync.Once
-	testBool    bool
 }
 
-func (wlr *WordListReader) readLine() (string, bool) {
+func (wlr *wordListReader) readLine() (string, bool) {
 	//wlr.readlinemu.Lock()
 	//defer wlr.readlinemu.Unlock()
 	return wlr.scanner.Text(), wlr.scanner.Scan()
 
 }
-func (wlr *WordListReader) Close() {
+func (wlr *wordListReader) Close() {
 	wlr.file.Close()
 }
 
-func (wlr *WordListReader) startIter() {
-	if wlr.testBool {
-		wlr.iterChannel = make(chan string, 3)
-	} else {
-		wlr.iterChannel = make(chan string)
-	}
-
+func (wlr *wordListReader) startIter() {
 	go func() {
 		cont := true
 		str := ""
@@ -46,13 +39,13 @@ func (wlr *WordListReader) startIter() {
 	return
 }
 
-func (wlr *WordListReader) Iter() chan string {
+func (wlr *wordListReader) Iter() chan string {
 	wlr.itermu.Do(wlr.startIter)
 	return wlr.iterChannel
 
 }
 
-func MakeNewWordListReader(filename string) WordListReader {
+func MakeBufferedWordListReader(filename string, buffSize int) wordListReader {
 	f, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("Error opening file: %s\n", err.Error())
@@ -60,10 +53,26 @@ func MakeNewWordListReader(filename string) WordListReader {
 	}
 	scanner := bufio.NewScanner(f)
 
-	return WordListReader{
-		filename: filename,
-		file:     f,
-		scanner:  scanner,
+	return wordListReader{
+		filename:    filename,
+		file:        f,
+		scanner:     scanner,
+		iterChannel: make(chan string, buffSize),
 	}
+}
 
+func MakeUnbufferedWordListReader(filename string) wordListReader {
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Printf("Error opening file: %s\n", err.Error())
+		os.Exit(1)
+	}
+	scanner := bufio.NewScanner(f)
+
+	return wordListReader{
+		filename:    filename,
+		file:        f,
+		scanner:     scanner,
+		iterChannel: make(chan string),
+	}
 }
