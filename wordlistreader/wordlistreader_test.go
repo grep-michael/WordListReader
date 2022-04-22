@@ -1,10 +1,10 @@
-package test
+package wordlistreader
 
 import (
+	"fmt"
 	"sync"
 	"testing"
-
-	"github.com/michaelknudsen/WordListReader/wordlistreader"
+	"time"
 )
 
 /*
@@ -15,10 +15,80 @@ import (
 
 */
 
+func TestSpeedOneThread(t *testing.T) {
+	var wg sync.WaitGroup
+	wlr := MakeNewWordListReader("../rockyou.txt")
+	wg.Add(1)
+	start := time.Now()
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	duration := time.Since(start)
+	fmt.Printf("Duation of unbuffered One thread: %v\n", duration)
+	wlr.Close()
+
+	wlr = MakeNewWordListReader("../rockyou.txt")
+	wlr.testBool = true
+	wg.Add(1)
+	start = time.Now()
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	duration = time.Since(start)
+	fmt.Printf("Duation of unbuffered One thread: %v\n", duration)
+	wlr.Close()
+
+}
+
+func TestSpeedTwoThread(t *testing.T) {
+	var wg sync.WaitGroup
+	wlr := MakeNewWordListReader("../rockyou.txt")
+	wg.Add(1)
+	start := time.Now()
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	duration := time.Since(start)
+	fmt.Printf("Duation of unbuffered Two thread: %v\n", duration)
+	wlr.Close()
+
+	wlr = MakeNewWordListReader("../rockyou.txt")
+	wlr.testBool = true
+	wg.Add(1)
+	start = time.Now()
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for range wlr.Iter() { //simply read
+		}
+	}()
+	duration = time.Since(start)
+	fmt.Printf("Duation of unbuffered Two thread: %v\n", duration)
+	wlr.Close()
+
+}
+
 func TestIter(t *testing.T) {
 
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordListReader("../rockyou.txt")
+	wlr := MakeNewWordListReader("../rockyou.txt")
 	defer wlr.Close()
 
 	threadOneWords := []string{}
@@ -55,7 +125,7 @@ func TestIterWithChannels(t *testing.T) {
 	two := make(chan string, 1)
 
 	var wg sync.WaitGroup
-	wlr := wordlistreader.MakeNewWordListReader("../rockyou.txt")
+	wlr := MakeNewWordListReader("../rockyou.txt")
 	defer wlr.Close()
 
 	wg.Add(1)
