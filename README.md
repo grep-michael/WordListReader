@@ -1,5 +1,5 @@
 # WordListReader
 
-concurrent lib for reading from a wordList
-primary use case is for making pentesting scripts
-make an inssue with suggestions :D
+concurrent library for reading from a wordList <br>
+primary use case is for making pentesting scripts <br>
+
